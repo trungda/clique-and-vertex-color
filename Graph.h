@@ -31,6 +31,7 @@ class Graph {
   void calComplementList();
   vector< vector<int> > getAdjList();
   vector< vector<int> > getComplementAdjList();
+  Graph getComplementGraph();  
 };
 
 class Clique {
@@ -46,6 +47,8 @@ class Clique {
 
   //set of current maximum clique 
   unsigned int Qmax[MAX_NUMBER_OF_VERTICES / BITS + 1];
+  
+  bool Colored[MAX_NUMBER_OF_VERTICES];
   
   unsigned int c[MAX_NUMBER_OF_VERTICES];
 
@@ -66,15 +69,17 @@ class Clique {
   void EXPAND(unsigned int *, unsigned int); 
   void BASICEXPAND(unsigned int *, unsigned int);
   int MaxCliqueFinding();
-  void CliqueCover();
+  void CliquePartition();
 
   //END OF SUPPORTING FUNCTIONS DECLARATION-------------------------------------------------------------------
 
 public:
   Clique();
   Clique(Graph);
-  vector<int> getMaximumClique();
-  vector< vector<int> > getCliqueCoverList();
+  int getMaximumCliqueSize();
+  vector<int> getMaximumCliqueList();
+  int getCliquePartitionNum();
+  vector< vector<int> > getCliquePartitionList();
   void displayResult();
 };
 

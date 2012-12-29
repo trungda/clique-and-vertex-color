@@ -67,6 +67,7 @@ void Graph::calComplementList() {
     for (int j = 0; j < nVertex; j ++) {
       adjacent[j] = false;
     }
+    adjacent[i] = true;
     for (int j = 0; j < mList[i].size(); j ++) {
       adjacent[mList[i][j]] = true;
     }
@@ -102,6 +103,11 @@ bool Graph::isConnected(int i, int j) {
 
 int Graph::getNumVertices() {
   return nVertex;
+}
+
+Graph Graph::getComplementGraph() {
+  Graph ret(mComplementList);
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -200,8 +206,7 @@ void Clique::EXPAND(unsigned int * Rem, unsigned int CurCliqueSize) {
   if (CurListSize == 0) {
     if (MaxCliqueSize < CurCliqueSize) {
       MaxCliqueSize = CurCliqueSize;
-      cout << MaxCliqueSize << endl;
-      for (int i = 0; i < (n - 1) / BITS; i ++) {
+      for (int i = 0; i <= (n - 1) / BITS; i ++) {
 	Qmax[i] = Q[i];
       }
     }
@@ -227,36 +232,30 @@ int Clique::MaxCliqueFinding() {
   unsigned int Rem[MAX_NUMBER_OF_VERTICES / BITS + 1];
   MaxCliqueSize = 0;
   for (int i = 0; i <= (n - 1) / BITS; i ++) {
-    Rem[i] = 0;
+    Rem[i] = Q[i] = Qmax[i] = 0;
   }
-  for (int i = 0; i <= (n - 1) / BITS; i ++) {
-    Q[i] = Qmax[i] = 0;
-  }
-  for (int i = 0; i < n; i ++) {
-    setBit(Rem[i / BITS], i % BITS);
-  }
+  for (int i = 0; i < n; i ++) 
+    if (!Colored[i]) {
+      setBit(Rem[i / BITS], i % BITS);
+    }
   EXPAND(Rem, 0);
   return MaxCliqueSize;
 }
 
-void Clique::CliqueCover() {
-  bool Cover[MAX_NUMBER_OF_VERTICES];
+void Clique::CliquePartition() {
   MaxClique.clear();
   CliqueList.clear();
   for (int i = 0; i < n; i ++) {
-    Cover[i] = false;
+    Colored[i] = false;
   }
   while (MaxCliqueFinding() > 0) {
     vector<int> newClique;
-    for (int i = 0; i <= n - 1; i ++) {
-      if (getBit(Qmax[i / BITS], i % BITS))
-	Cover[i] = true;
+    for (int i = 0; i < n; i ++) {
+      if (getBit(Qmax[i / BITS], i % BITS)) {
+	Colored[i] = true;
 	newClique.push_back(i);
-	for (int j = 0; j <= n - 1; j ++) {
-	  clearBit(ll[i][j / BITS], j % BITS);
-	  clearBit(ll[j][i / BITS], i % BITS);	    
-	}
       }
+    }
     CliqueList.push_back(newClique);
     if (MaxClique.size() == 0) {
       for (int i = 0; i < newClique.size(); i ++) {
@@ -264,6 +263,12 @@ void Clique::CliqueCover() {
       }
     }
   }
+  //  cout << CliqueList.size() << endl;
+  //for (int i = 0; i < CliqueList.size(); i ++) {
+  //  for (int j = 0; j < CliqueList[i].size(); j ++)
+  //    cout << CliqueList[i][j] << " ";
+  //  cout << endl;
+  //}
 }
 
 Clique::Clique() {
@@ -288,15 +293,22 @@ Clique::Clique(Graph OriginalGraph) {
       setBit(ll[i][j / BITS], j % BITS);
     }
   }
-  cout << "Maximum clique size: " << MaxCliqueSize << endl;
-  CliqueCover();
+  CliquePartition();
 };
 
-vector<int> Clique::getMaximumClique() {
+int Clique::getMaximumCliqueSize() {
+  return MaxClique.size();
+}
+
+vector<int> Clique::getMaximumCliqueList() {
   return MaxClique;
 }
 
-vector< vector<int> > Clique::getCliqueCoverList() {
+int Clique::getCliquePartitionNum() {
+  return CliqueList.size();
+}
+
+vector< vector<int> > Clique::getCliquePartitionList() {
   return CliqueList;
 }
 
@@ -351,7 +363,7 @@ void VertexColor::HeuristicColoring() {
   int Color[MAX_NUMBER_OF_VERTICES];
   int CurColor = 0;
   for (int i = 0; i < n; i ++) {
-    int u = deg[i].first;    
+    int u = deg[i].first;
     Color[u] = -1;
     bool Used[MAX_NUMBER_OF_VERTICES];
     for (int j = 0; j < CurColor; j ++) {
