@@ -53,6 +53,7 @@ Graph::Graph(vector< vector<int> > list) {
     for (int j = 0; j < list[i].size(); j ++) {
       newList.push_back(list[i][j]);
     }
+    sort(newList.begin(), newList.end());
     mList.push_back(newList);
   }
   calComplementList();
@@ -73,6 +74,7 @@ void Graph::calComplementList() {
       if (!adjacent[j]) {
 	newList.push_back(j);
       }
+    sort(newList.begin(), newList.end());
     mComplementList.push_back(newList);
   }
 }
@@ -84,6 +86,24 @@ vector< vector<int> > Graph::getAdjList() {
 vector< vector<int> > Graph::getComplementAdjList() {
   return mComplementList;
 }
+
+bool Graph::isConnected(int i, int j) {
+  if (mList[i].size() == 0) return false;
+  int lo = 0;
+  int hi = mList[i].size() - 1;
+  while (lo < hi) {
+    int mid = (lo + hi) / 2;
+    if (mList[i][mid] == j) return true;
+    if (mList[i][mid] > j) hi = mid - 1;
+    else lo = mid + 1;
+  }
+  return false;
+}
+
+int Graph::getNumVertices() {
+  return nVertex;
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 
 void Clique::intersect(unsigned int * lli, unsigned int * R, unsigned int *Rp) {
@@ -360,13 +380,6 @@ void VertexColor::HeuristicColoring() {
 }
 
 vector< vector<int> > VertexColor::getColorList() {
-  cout << ColorList.size() << endl;
-  for (int i = 0; i < ColorList.size(); i ++) {
-    cout << i << ": ";
-    for (int j = 0; j < ColorList[i].size(); j ++)
-      cout << ColorList[i][j] << " ";
-    cout << endl;
-  }
   return ColorList;
 }
 

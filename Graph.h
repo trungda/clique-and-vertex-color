@@ -26,7 +26,9 @@ class Graph {
  public:
   Graph();
   Graph(vector< vector<int> >);
-  void calComplementList();  
+  int getNumVertices();
+  bool isConnected(int, int);
+  void calComplementList();
   vector< vector<int> > getAdjList();
   vector< vector<int> > getComplementAdjList();
 };
