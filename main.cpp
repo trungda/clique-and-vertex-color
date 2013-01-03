@@ -15,7 +15,7 @@ int main() {
   return 0;
 }
 
-void CheckColorCorrection(Graph &graph, VertexColor & vertexcolor) {
+void CheckColorCorrection(Graph &graph, VertexColor &vertexcolor) {
   cout << "Check GRAPH COLOR algorithm: " << endl;
   int color[MAX_NUMBER_OF_VERTICES];
   for (int i = 0; i < graph.getNumVertices(); i ++) {
@@ -36,7 +36,7 @@ void CheckColorCorrection(Graph &graph, VertexColor & vertexcolor) {
       for (int k = j + 1; k < ColorList[i].size(); k ++) {
 	int v = ColorList[i][k];
 	if (graph.isConnected(u, v)) {
-	  cout << "ERROR: " << u << " and " << v << "are adjacent but same color." << endl;
+	  cout << "ERROR: " << u << " and " << v << " are adjacent but same color." << endl;
 	  return ;
 	}
       }
@@ -102,8 +102,8 @@ void UnitTest() {
   Graph graph(list);
   VertexColor vertexcolor(graph);
   Clique clique(graph.getComplementGraph());
-  CheckColorCorrection(graph, vertexcolor);
   CheckColorCorrection(graph, clique);
+  CheckColorCorrection(graph, vertexcolor);
 }
 
 void DIMACS() {
@@ -131,6 +131,4 @@ void DIMACS() {
   }
   Graph graph(list);
   Clique clique(graph);
-  cout << "Maximum clique size: " << clique.getMaximumCliqueSize() << endl;
-  cout << "Number of partitions: " << clique.getCliquePartitionNum() << endl;
 }

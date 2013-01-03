@@ -9,8 +9,8 @@
 
 using namespace std;
 
-#define MAX_NUMBER_OF_VERTICES 5000
-#define MAX_NUMBER_OF_COLORS 5000
+#define MAX_NUMBER_OF_VERTICES 1000
+#define MAX_NUMBER_OF_COLORS 1000
 #define BITS 32
 
 void setBit(unsigned int &x, int i);
@@ -26,6 +26,7 @@ class Graph {
  public:
   Graph();
   Graph(vector< vector<int> >);
+  ~Graph();
   int getNumVertices();
   bool isConnected(int, int);
   void calComplementList();
@@ -76,30 +77,39 @@ class Clique {
 public:
   Clique();
   Clique(Graph);
-  int getMaximumCliqueSize();
+  ~Clique();
   vector<int> getMaximumCliqueList();
-  int getCliquePartitionNum();
   vector< vector<int> > getCliquePartitionList();
-  void displayResult();
 };
 
 class VertexColor {
  private:
   int n;
+
+  int CurUsedColor;
+  int BestColorNum; // best number of used colors up to now
+
   unsigned int ll[MAX_NUMBER_OF_VERTICES][MAX_NUMBER_OF_VERTICES / BITS + 1];
   vector< pair<int, int> > deg;
-  vector< vector<int> > ColorList;
+
+  int Color[MAX_NUMBER_OF_VERTICES];
+  int CurColor[MAX_NUMBER_OF_VERTICES];
   
-  bool IsConnected(int, int);
-  
-  void HeuristicColoring();
-  void Coloring();
+  int DSATUR[MAX_NUMBER_OF_VERTICES]; // degree of saturation list
+
   bool isConnected(int, int);
   
- public:
+  void HeuristicColoring();
+
+  bool isPossible(int, int);
+  void Update(int, int);
+  void BBColoring(int, int); // branch and bound coloring
+  void Coloring();
+  
+ public:  
   VertexColor();
   VertexColor(Graph);
+  ~VertexColor();
   vector< vector<int> > getColorList();
-  void displayResult();
 };
 #endif
