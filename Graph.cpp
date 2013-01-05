@@ -114,11 +114,6 @@ int Graph::getNumVertices() {
   return nVertex;
 }
 
-Graph Graph::getComplementGraph() {
-  Graph ret(mComplementList);
-  return ret;
-}
-
 //////////////////////////////////////////////////////////////////////////////////
 
 void Clique::intersect(unsigned int * lli, unsigned int * R, unsigned int *Rp) {
@@ -264,17 +259,46 @@ void Clique::CliquePartition() {
   for (int i = 0; i < n; i ++) {
     Colored[i] = false;
   }
-  while (MaxCliqueFinding() > 0) {
+  // clique partition by finding MAXIMUM clique each time
+  // while (MaxCliqueFinding() > 0) {
+  //   vector<int> newClique;
+  //   for (int i = 0; i < n; i ++) {
+  //     if (getBit(Qmax[i / BITS], i % BITS)) {
+  // 	Colored[i] = true;
+  // 	newClique.push_back(i);
+  //     }
+  //   }
+  //   CliqueList.push_back(newClique);
+  // }
+
+  // Clique partition by finding MAXIMAL clique each time
+  int id = 0;
+  while (id < n) {
+    int u = deg[id].first;
+    if (Colored[u]) {
+      id ++;
+      continue;
+    }
     vector<int> newClique;
-    for (int i = 0; i < n; i ++) {
-      if (getBit(Qmax[i / BITS], i % BITS)) {
-	Colored[i] = true;
-	newClique.push_back(i);
+    newClique.push_back(u);
+    for (int i = id + 1; i < n; i ++) {
+      int v = deg[i].first;
+      if (Colored[v]) continue;
+      bool ok = true;
+      for (int j = 0; j < newClique.size(); j ++)
+	if (!isConnected(newClique[j], v)) {
+	  ok = false;
+	  break;
+	}
+      if (ok) {
+	newClique.push_back(v);
       }
     }
-    CliqueList.push_back(newClique);    
+    for (int i = 0; i < newClique.size(); i ++) {
+      Colored[newClique[i]] = true;
+    }
+    CliqueList.push_back(newClique);
   }
-
   for (int i = 0; i < n; i ++) {
     Colored[i] = false;
   }

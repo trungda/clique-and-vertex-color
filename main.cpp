@@ -7,7 +7,7 @@ vector< vector<int> > list;
 void DIMACS();
 void UnitTest();
 void CheckColorCorrection(Graph &, VertexColor &);
-void CheckColorCorrection(Graph &, Clique &);
+void CheckCliqueCorrection(Graph &, Clique &);
 
 int main() {
   UnitTest();
@@ -50,7 +50,7 @@ void CheckColorCorrection(Graph &graph, VertexColor &vertexcolor) {
   }
 }
 
-void CheckColorCorrection(Graph &graph, Clique & clique) {
+void CheckCliqueCorrection(Graph &graph, Clique & clique) {
   cout << "Check CLIQUE PARTITION algorithm: " << endl;
   int color[MAX_NUMBER_OF_VERTICES];
   for (int i = 0; i < graph.getNumVertices(); i ++) {
@@ -63,7 +63,7 @@ void CheckColorCorrection(Graph &graph, Clique & clique) {
       if (color[u] == -1) color[u] = i;
       else {
 	cout << "ERROR: a vertex is colored twice." << endl;
-	return;
+	//	return;
       }
     }
     for (int j = 0; j < ColorList[i].size(); j ++) {
@@ -77,7 +77,7 @@ void CheckColorCorrection(Graph &graph, Clique & clique) {
       }
     }
   }
-  cout << "CORRECT!!! " << ColorList.size() << " colors are used." << endl;
+  cout << "CORRECT!!! " << ColorList.size() << " partitions are found." << endl;
   for (int i = 0; i < ColorList.size(); i ++) {
     for (int j = 0; j < ColorList[i].size(); j ++)
       cout << ColorList[i][j] << " ";
@@ -100,10 +100,11 @@ void UnitTest() {
     list.push_back(adjlist[i]);
   }
   Graph graph(list);
-  VertexColor vertexcolor(graph);
-  Clique clique(graph.getComplementGraph());
-  CheckColorCorrection(graph, clique);
-  CheckColorCorrection(graph, vertexcolor);
+  Graph complement(graph.getComplementAdjList());
+  VertexColor vertexcolor(complement);
+  Clique clique(graph);
+  CheckCliqueCorrection(complement, clique);
+  CheckColorCorrection(complement, vertexcolor);
 }
 
 void DIMACS() {

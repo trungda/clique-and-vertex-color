@@ -13,6 +13,8 @@ using namespace std;
 #define MAX_NUMBER_OF_COLORS 1000
 #define BITS 32
 
+typedef pair<int, int> IdDeg;
+
 void setBit(unsigned int &x, int i);
 void clearBit(unsigned int &x, int i);
 unsigned int getBit(unsigned int x, int i);
@@ -32,7 +34,6 @@ class Graph {
   void calComplementList();
   vector< vector<int> > getAdjList();
   vector< vector<int> > getComplementAdjList();
-  Graph getComplementGraph();  
 };
 
 class Clique {
@@ -41,7 +42,7 @@ class Clique {
   int n;
   // Adjacency matrix
   unsigned int ll[MAX_NUMBER_OF_VERTICES][MAX_NUMBER_OF_VERTICES / BITS + 1];
-  vector< pair<int, int> > deg;
+  vector< IdDeg > deg;
 
   //set of current clique
   unsigned int Q[MAX_NUMBER_OF_VERTICES / BITS + 1];
@@ -90,7 +91,7 @@ class VertexColor {
   int BestColorNum; // best number of used colors up to now
 
   unsigned int ll[MAX_NUMBER_OF_VERTICES][MAX_NUMBER_OF_VERTICES / BITS + 1];
-  vector< pair<int, int> > deg;
+  vector< IdDeg > deg;
 
   int Color[MAX_NUMBER_OF_VERTICES];
   int CurColor[MAX_NUMBER_OF_VERTICES];
