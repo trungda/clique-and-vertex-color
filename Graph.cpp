@@ -26,7 +26,7 @@ bool comp(const IdDeg &x, const IdDeg &y) {
   if (x.second > y.second) return true;
   if (x.second < y.second) return false;
   if (x.first < y.first) return true;
-  return true;
+  return false;
 }
 
 void setBit(unsigned int &x, int i) { 
