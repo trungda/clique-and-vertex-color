@@ -22,7 +22,7 @@ vertices in the original graph. This function is used for Vertex Coloring Proble
 color. In other words, each list forms a clique.
 */
 
-bool comp(pair<int, int> x, pair<int, int> y) {
+bool comp(const IdDeg &x, const IdDeg &y) {
   if (x.second > y.second) return true;
   if (x.second < y.second) return false;
   if (x.first < y.first) return true;
