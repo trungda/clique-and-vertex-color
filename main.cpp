@@ -1,4 +1,6 @@
+#include "Clique.h"
 #include "Graph.h"
+#include "VertexColor.h"
 
 int n, m;
 vector<int> adjlist[MAX_NUMBER_OF_VERTICES];
@@ -10,8 +12,8 @@ void CheckColorCorrection(Graph &, VertexColor &);
 void CheckCliqueCorrection(Graph &, Clique &);
 
 int main() {
-  UnitTest();
-  //DIMACS();
+  // UnitTest();
+  // DIMACS();
   return 0;
 }
 
@@ -50,26 +52,25 @@ void CheckColorCorrection(Graph &graph, VertexColor &vertexcolor) {
   }
 }
 
-void CheckCliqueCorrection(Graph &graph, Clique & clique) {
+void CheckCliqueCorrection(Graph &graph, Clique &clique) {
   cout << "Check CLIQUE PARTITION algorithm: " << endl;
   int color[MAX_NUMBER_OF_VERTICES];
   for (int i = 0; i < graph.getNumVertices(); i ++) {
     color[i] = -1;
   }
-  vector< vector<int> > ColorList = clique.getCliquePartitionList();
-  for (int i = 0; i < ColorList.size(); i ++) {
-    for (int j = 0; j < ColorList[i].size(); j ++) {
-      int u = ColorList[i][j];
+  vector< vector<int> > colorList = clique.getCliquePartitionList();
+  for (int i = 0; i < colorList.size(); i ++) {
+    for (int j = 0; j < colorList[i].size(); j ++) {
+      int u = colorList[i][j];
       if (color[u] == -1) color[u] = i;
       else {
 	cout << "ERROR: a vertex is colored twice." << endl;
-	//	return;
       }
     }
-    for (int j = 0; j < ColorList[i].size(); j ++) {
-      int u = ColorList[i][j];
-      for (int k = j + 1; k < ColorList[i].size(); k ++) {
-	int v = ColorList[i][k];
+    for (int j = 0; j < colorList[i].size(); j ++) {
+      int u = colorList[i][j];
+      for (int k = j + 1; k < colorList[i].size(); k ++) {
+	int v = colorList[i][k];
 	if (graph.isConnected(u, v)) {
 	  cout << "ERROR: " << u << " and " << v << " are adjacent but same color." << endl;
 	  return ;
@@ -77,10 +78,10 @@ void CheckCliqueCorrection(Graph &graph, Clique & clique) {
       }
     }
   }
-  cout << "CORRECT!!! " << ColorList.size() << " partitions are found." << endl;
-  for (int i = 0; i < ColorList.size(); i ++) {
-    for (int j = 0; j < ColorList[i].size(); j ++)
-      cout << ColorList[i][j] << " ";
+  cout << "CORRECT!!! " << colorList.size() << " partitions are found." << endl;
+  for (int i = 0; i < colorList.size(); i ++) {
+    for (int j = 0; j < colorList[i].size(); j ++)
+      cout << colorList[i][j] << " ";
     cout << endl;
   }
 }
