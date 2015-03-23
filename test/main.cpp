@@ -1,31 +1,35 @@
-#include "Clique.h"
-#include "Graph.h"
-#include "VertexColor.h"
+//
+// Test program for the two libraries: max clique finding and vertex color.
+//
+
+#include "../src/Clique.h"
+#include "../src/Graph.h"
+#include "../src/VertexColor.h"
 
 int n, m;
 vector<int> adjlist[MAX_NUMBER_OF_VERTICES];
 vector< vector<int> > list;
 
-void DIMACS();
+void DIMACSTest();
 void UnitTest();
 void CheckColorCorrection(Graph &, VertexColor &);
 void CheckCliqueCorrection(Graph &, Clique &);
 
 int main() {
-  // UnitTest();
-  // DIMACS();
+  UnitTest();
+  // DIMACSTest();
   return 0;
 }
 
 void CheckColorCorrection(Graph &graph, VertexColor &vertexcolor) {
   cout << "Check GRAPH COLOR algorithm: " << endl;
   int color[MAX_NUMBER_OF_VERTICES];
-  for (int i = 0; i < graph.getNumVertices(); i ++) {
+  for (size_t i = 0; i < graph.getNumVertices(); i ++) {
     color[i] = -1;
   }
   vector< vector<int> > ColorList = vertexcolor.getColorList();
-  for (int i = 0; i < ColorList.size(); i ++) {
-    for (int j = 0; j < ColorList[i].size(); j ++) {
+  for (size_t i = 0; i < ColorList.size(); i ++) {
+    for (size_t j = 0; j < ColorList[i].size(); j ++) {
       int u = ColorList[i][j];
       if (color[u] == -1) color[u] = i;
       else {
@@ -33,9 +37,9 @@ void CheckColorCorrection(Graph &graph, VertexColor &vertexcolor) {
 	return;
       }
     }
-    for (int j = 0; j < ColorList[i].size(); j ++) {
+    for (size_t j = 0; j < ColorList[i].size(); j ++) {
       int u = ColorList[i][j];
-      for (int k = j + 1; k < ColorList[i].size(); k ++) {
+      for (size_t k = j + 1; k < ColorList[i].size(); k ++) {
 	int v = ColorList[i][k];
 	if (graph.isConnected(u, v)) {
 	  cout << "ERROR: " << u << " and " << v << " are adjacent but same color." << endl;
@@ -45,8 +49,8 @@ void CheckColorCorrection(Graph &graph, VertexColor &vertexcolor) {
     }
   }
   cout << "CORRECT!!! " << ColorList.size() << " colors are used." << endl;
-  for (int i = 0; i < ColorList.size(); i ++) {
-    for (int j = 0; j < ColorList[i].size(); j ++)
+  for (size_t i = 0; i < ColorList.size(); i ++) {
+    for (size_t j = 0; j < ColorList[i].size(); j ++)
       cout << ColorList[i][j] << " ";
     cout << endl;
   }
@@ -55,21 +59,21 @@ void CheckColorCorrection(Graph &graph, VertexColor &vertexcolor) {
 void CheckCliqueCorrection(Graph &graph, Clique &clique) {
   cout << "Check CLIQUE PARTITION algorithm: " << endl;
   int color[MAX_NUMBER_OF_VERTICES];
-  for (int i = 0; i < graph.getNumVertices(); i ++) {
+  for (size_t i = 0; i < graph.getNumVertices(); i ++) {
     color[i] = -1;
   }
   vector< vector<int> > colorList = clique.getCliquePartitionList();
-  for (int i = 0; i < colorList.size(); i ++) {
-    for (int j = 0; j < colorList[i].size(); j ++) {
+  for (size_t i = 0; i < colorList.size(); i ++) {
+    for (size_t j = 0; j < colorList[i].size(); j ++) {
       int u = colorList[i][j];
       if (color[u] == -1) color[u] = i;
       else {
 	cout << "ERROR: a vertex is colored twice." << endl;
       }
     }
-    for (int j = 0; j < colorList[i].size(); j ++) {
+    for (size_t j = 0; j < colorList[i].size(); j ++) {
       int u = colorList[i][j];
-      for (int k = j + 1; k < colorList[i].size(); k ++) {
+      for (size_t k = j + 1; k < colorList[i].size(); k ++) {
 	int v = colorList[i][k];
 	if (graph.isConnected(u, v)) {
 	  cout << "ERROR: " << u << " and " << v << " are adjacent but same color." << endl;
@@ -79,8 +83,8 @@ void CheckCliqueCorrection(Graph &graph, Clique &clique) {
     }
   }
   cout << "CORRECT!!! " << colorList.size() << " partitions are found." << endl;
-  for (int i = 0; i < colorList.size(); i ++) {
-    for (int j = 0; j < colorList[i].size(); j ++)
+  for (size_t i = 0; i < colorList.size(); i ++) {
+    for (size_t j = 0; j < colorList[i].size(); j ++)
       cout << colorList[i][j] << " ";
     cout << endl;
   }
@@ -88,16 +92,16 @@ void CheckCliqueCorrection(Graph &graph, Clique &clique) {
 
 void UnitTest() {
   cin >> n;
-  for (int i = 0; i < n; i ++) {
+  for (size_t i = 0; i < n; i ++) {
     int deg;
     cin >> deg;
-    for (int k = 0; k < deg; k ++) {
+    for (size_t k = 0; k < deg; k ++) {
       int j;
       cin >> j;
       adjlist[i].push_back(j);
     }
   }
-  for (int i = 0; i < n; i ++) {
+  for (size_t i = 0; i < n; i ++) {
     list.push_back(adjlist[i]);
   }
   Graph graph(list);
@@ -108,7 +112,7 @@ void UnitTest() {
   CheckColorCorrection(complement, vertexcolor);
 }
 
-void DIMACS() {
+void DIMACSTest() {
   char command;
   while (cin >> command) {
     string s;
@@ -128,7 +132,7 @@ void DIMACS() {
       adjlist[j].push_back(i);
     }
   }
-  for (int i = 0; i < n; i ++) {
+  for (size_t i = 0; i < n; i ++) {
     list.push_back(adjlist[i]);
   }
   Graph graph(list);
