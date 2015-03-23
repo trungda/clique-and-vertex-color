@@ -1,19 +1,43 @@
 CC = g++
 DEBUG = -g
-CFLAGS = -g -Wall -Wextra -pthread
-SOURCES = main.cpp Clique.cc Graph.cpp VertexColor.cc 
-OBJECTS=$(SOURCES:.cc=.o)
-EXECUTABLE = clique
+CFLAGS = -Wall -Wextra -I.
+
+BIN = bin
+BUILD = build
+SRC = src
+
+HEADER = $(SRC)/Graph.h $(SRC)/Clique.h $(SRC)/VertexColor.h
+SOURCE = $(SRC)/Graph.cpp $(SRC)/Clique.cpp $(SRC)/VertexColor.cpp
+OBJECT = $(BUILD)/Graph.o $(BUILD)/Clique.o $(BUILD)/VertexColor.o
+
+TEST = test
+
+TEST_SOURCE = $(TEST)/main.cpp
+TEST_OBJECT = $(BUILD)/main.o
 
 # Target
+$(BIN)/test: $(TEST_OBJECT) $(OBJECT)
+	/bin/mkdir -p $(BIN)
+	$(CC) $(CFLAGS) -o $@ $(TEST_OBJECT) $(OBJECT)
 
-all : $(EXECUTABLE) $(SOURCES)
+$(TEST_OBJECT): $(TEST_SOURCE) $(HEADER)
+	/bin/mkdir -p $(BUILD)
+	$(CC) -c $(CFLAGS) $< -o $@
 
-$(EXECUTABLE) : $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@
+$(BUILD)/Graph.o: $(SRC)/Graph.cpp
+	/bin/mkdir -p $(BUILD)
+	$(CC) -c $(CFLAGS) $< -o $@
 
-.cpp.o :
-	$(CC) $(CFLAGS) $< -o $@
+$(BUILD)/Clique.o: $(SRC)/Clique.cpp $(SRC)/Graph.h
+	/bin/mkdir -p $(BUILD)
+	$(CC) -c $(CFLAGS) $< -o $@
+
+$(BUILD)/VertexColor.o: $(SRC)/VertexColor.cpp $(SRC)/Graph.h $(SRC)/Clique.h
+	/bin/mkdir -p $(BUILD)
+	$(CC) -c $(CFLAGS) $< -o $@
+
 
 clean:
-	rm -rf $(EXECUTABLE) *.o *.a *~
+	/bin/rm -rf $(TEST)/*~ $(SRC)/*~ 
+	/bin/rm -rf $(BUILD)
+	/bin/rm -rf $(BIN)
