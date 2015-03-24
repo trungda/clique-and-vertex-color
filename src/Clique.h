@@ -1,5 +1,5 @@
 /*
-Clique: Partition the graph into subsets of vertices. Each set forms a clique.
+  Clique: Partition the graph into subsets of vertices. Each set forms a clique.
 */
 
 #ifndef CLIQUE_H
@@ -7,49 +7,60 @@ Clique: Partition the graph into subsets of vertices. Each set forms a clique.
 
 #include "Graph.h"
 
-class Clique {
- private:
-  //VARIABLES DECLARATION---------------------------------------------------------------------------
-  int n;
-  // Adjacency matrix
-  unsigned int ll[MAX_NUMBER_OF_VERTICES][MAX_NUMBER_OF_VERTICES / BITS + 1];
-  vector< IdDeg > deg;
+#define BITS 32
 
-  //set of current clique
-  unsigned int Q[MAX_NUMBER_OF_VERTICES / BITS + 1];
+namespace ngclique {
 
-  //set of current maximum clique 
-  unsigned int Qmax[MAX_NUMBER_OF_VERTICES / BITS + 1];
+  class Clique {
+  public:
+    Clique();
+    Clique(Graph &graph);
+    ~Clique();
+
+    vector<int> max_clique() { 
+      if (max_clique_.size() == 0) FindMaxClique(); 
+      return max_clique_;
+    };
+
+    vector< vector<int> > clique_partition_list() {
+      if (clique_list_.size() == 0) CliquePartition(); 
+      return clique_list_;
+    };
+
+  private:
+    bool IsConnected(int, int);
+    vector<unsigned int> Intersect(vector<unsigned int> &adj_list_i, vector<unsigned int> &R);
+    int CountOneBit(int start, vector<unsigned int> &x);
   
-  bool Colored[MAX_NUMBER_OF_VERTICES];
+    int VertexColor(vector<unsigned int> &rem, vector<unsigned int> &col, unsigned int &cur_list_size);
+    void Expand(vector<unsigned int> &rem, unsigned int cur_clique_size); 
+    void BasicExpand(vector<unsigned int> &rem, unsigned int cur_clique_size);
+    int FindMaxClique();
+    void CliquePartition();  
+
+  private: 
+    size_t num_vertices_;
+
+    // Adjacency matrix
+    vector< vector<unsigned int> > adj_matrix_;
+
+    // vector of pairs (vertex id, vertex degree) 
+    vector<IdDeg> id_deg_;
+
+    //set of current clique
+    vector<unsigned int> cur_clique_;
+
+    //set of current maximum clique 
+    vector<unsigned int> cur_max_clique_;
   
-  unsigned int c[MAX_NUMBER_OF_VERTICES];
-
-  unsigned int maxCliqueSize;
-
-  vector<int> maxClique;
-  vector< vector<int> > cliqueList;
-  //END OF VARIALBLES DECLARATION--------------------------------------------------------------------
-
-  //SUPPORTING FUNCTIONS DECLARATION-----------------------------------------------------------------
-  bool isConnected(int, int);
-  void intersect(unsigned int * lli, unsigned int * R, unsigned int *Rp);
-  int countOneBit(int start, unsigned int *x);
+    vector<bool> colored_;
   
-  int vertexColor(unsigned int *, unsigned int *, unsigned int &);
-  void expand(unsigned int *, unsigned int); 
-  void basicExpand(unsigned int *, unsigned int);
-  int maxCliqueFinding();
-  void cliquePartition();
+    unsigned int max_clique_size_;
 
-  //END OF SUPPORTING FUNCTIONS DECLARATION-------------------------------------------------------------------
+    vector<int> max_clique_;
+    vector< vector<int> > clique_list_;
+  };
 
-public:
-  Clique();
-  Clique(Graph);
-  ~Clique();
-  vector<int> getMaximumCliqueList();
-  vector< vector<int> > getCliquePartitionList();
-};
+}
 
 #endif

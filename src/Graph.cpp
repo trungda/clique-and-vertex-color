@@ -1,95 +1,84 @@
 #include "Graph.h"
 
-Graph::Graph(vector< vector<int> > list) {
-  mList.clear();
-  mComplementList.clear();
-  nVertex = 0;
-  if (list.size() == 0) return;
-  nVertex = list.size();
-  for (int i = 0; i < nVertex; i ++) {
-    vector<int> newList;
-    for (int j = 0; j < list[i].size(); j ++) {
-      newList.push_back(list[i][j]);
-    }
-    sort(newList.begin(), newList.end());
-    mList.push_back(newList);
+namespace ngclique {
+
+  Graph::Graph() {
   }
-  calComplementList();
-}
 
-Graph::~Graph() {
-  for (int i = 0; i < mList.size(); i ++)
-    mList[i].clear();
-  mList.clear();
-  for (int i = 0; i < mComplementList.size(); i ++)
-    mComplementList[i].clear();
-  mComplementList.clear();
-}
+  Graph::Graph(vector< vector<int> > adj_list) {
+    adj_list_.clear();
 
-void Graph::calComplementList() {
-  mComplementList.clear();
-  for (int i = 0; i < nVertex; i ++) {
-    vector<int> newList;
-    bool adjacent[MAX_NUMBER_OF_VERTICES];
-    for (int j = 0; j < nVertex; j ++) {
-      adjacent[j] = false;
+    num_vertices_ = adj_list.size();
+
+    for (size_t i = 0; i < num_vertices_; i ++) {
+      sort(adj_list[i].begin(), adj_list[i].end());
+      adj_list_.push_back(adj_list[i]);
     }
-    adjacent[i] = true;
-    for (int j = 0; j < mList[i].size(); j ++) {
-      adjacent[mList[i][j]] = true;
-    }
-    for (int j = 0; j < nVertex; j ++) 
-      if (!adjacent[j]) {
-	newList.push_back(j);
+
+    cal_complement_list();
+  }
+
+  Graph::~Graph() {
+    adj_list_.clear();
+    complement_adj_list_.clear();
+  }
+
+  void Graph::cal_complement_list() {
+    complement_adj_list_.clear();
+    for (size_t i = 0; i < num_vertices_; i ++) {
+      vector<int> new_adj_list;
+      vector<bool> adjacent(num_vertices_, false);
+      adjacent[i] = true;
+      for (size_t j = 0; j < adj_list_[i].size(); j ++) {
+	adjacent[adj_list_[i][j]] = true;
       }
-    sort(newList.begin(), newList.end());
-    mComplementList.push_back(newList);
+
+      for (size_t j = 0; j < num_vertices_; j ++) {
+	if (!adjacent[j]) {
+	  new_adj_list.push_back(j);
+	}
+      }
+
+      complement_adj_list_.push_back(new_adj_list);
+    }
   }
-}
 
-vector< vector<int> > Graph::getAdjList() {
-  return mList;
-}
+  bool Graph::IsConnected(int i, int j) const {
+    if (adj_list_[i].size() == 0) {
+      return false;
+    }
 
-vector< vector<int> > Graph::getComplementAdjList() {
-  return mComplementList;
-}
+    int lo = 0;
+    int hi = adj_list_[i].size() - 1;
+    while (lo <= hi) {
+      int mid = (lo + hi) / 2;
+      if (adj_list_[i][mid] == j) return true;
+      if (adj_list_[i][mid] > j) hi = mid - 1;
+      else lo = mid + 1;
+    }
 
-bool Graph::isConnected(int i, int j) {
-  if (mList[i].size() == 0) return false;
-  int lo = 0;
-  int hi = mList[i].size() - 1;
-  while (lo < hi) {
-    int mid = (lo + hi) / 2;
-    if (mList[i][mid] == j) return true;
-    if (mList[i][mid] > j) hi = mid - 1;
-    else lo = mid + 1;
+    return false;
   }
-  return false;
+
+  // helper functions
+
+  bool comp(const IdDeg &x, const IdDeg &y) {
+    if (x.second > y.second) return true;
+    if (x.second < y.second) return false;
+    if (x.first < y.first) return true;
+    return false;
+  }
+
+  void set_bit(unsigned int &x, int i) { 
+    x = x | (1 << i);
+  } 
+
+  void clear_bit(unsigned int &x, int i) { 
+    x = x & (~(1 << i));
+  } 
+
+  unsigned int get_bit(unsigned int x, int i) { 
+    return ((x & 1 << i) != 0); 
+  }
+
 }
-
-int Graph::getNumVertices() {
-  return nVertex;
-}
-
-// helper functions
-
-bool comp(const IdDeg &x, const IdDeg &y) {
-  if (x.second > y.second) return true;
-  if (x.second < y.second) return false;
-  if (x.first < y.first) return true;
-  return false;
-}
-
-void setBit(unsigned int &x, int i) { 
-  x = x | (1 << i);
-} 
-
-void clearBit(unsigned int &x, int i) { 
-  x = x & (~(1 << i));
-} 
-
-unsigned int getBit(unsigned int x, int i) { 
-  return ((x & 1 << i) != 0); 
-}
-

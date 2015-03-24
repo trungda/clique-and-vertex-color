@@ -1,42 +1,48 @@
 /*
-VertexColor: Solve the same problem as CliqueCover but using a different approach
+  VertexColor: Solve the same problem as CliqueCover but using a different approach
 */
-
 #ifndef VERTEX_COLOR_H
-#define VErTEX_COLOR_H
+#define VERTEX_COLOR_H
 
 #include "Clique.h"
 #include "Graph.h"
 
-class VertexColor {
- private:
-  int n;
+namespace ngclique {
 
-  int curUsedColor;
-  int bestColorNum; // best number of used colors up to now
+  class VertexColor {
+  public:  
+    VertexColor();
+    VertexColor(Graph &graph);
+    ~VertexColor();
+    vector< vector<int> > GetColorList();
 
-  unsigned int ll[MAX_NUMBER_OF_VERTICES][MAX_NUMBER_OF_VERTICES / BITS + 1];
-  vector< IdDeg > deg;
-
-  int color[MAX_NUMBER_OF_VERTICES];
-  int curColor[MAX_NUMBER_OF_VERTICES];
+  private:
+    bool IsConnected(int, int);
   
-  int DSATUR[MAX_NUMBER_OF_VERTICES]; // degree of saturation list
+    bool IsPossible(int, int);
+    void Update(int, int);
 
-  bool isConnected(int, int);
-  
-  void heuristicColoring();
+    void HeuristicColoring();
+    void BbColoring(int, int); // branch and bound coloring
+    void Coloring();  
 
-  bool isPossible(int, int);
-  void update(int, int);
-  void bbColoring(int, int); // branch and bound coloring
-  void coloring();
+  private:
+    size_t num_vertices_;
+
+    int cur_used_color_;
+    int best_color_num_; // best number of used colors up to now
+
+    vector< vector<unsigned int> > adj_matrix_;
+    vector< IdDeg > id_deg_;
+
+    vector<int> color_;
+
+    vector<int> cur_color_;
   
- public:  
-  VertexColor();
-  VertexColor(Graph);
-  ~VertexColor();
-  vector< vector<int> > getColorList();
-};
+    vector<int> dsatur_; // degree of saturation list
+
+  };
+
+}
 
 #endif

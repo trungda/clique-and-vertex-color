@@ -1,146 +1,172 @@
 #include "VertexColor.h"
 
-bool VertexColor::isConnected(int i, int j) {
-  return (getBit(ll[i][j / BITS], j % BITS) == 1);
-}
+namespace ngclique {
 
-VertexColor::VertexColor() {
-  deg.clear();
-}
-
-VertexColor::VertexColor(Graph OriginalGraph) {
-  vector< vector<int> > graph = OriginalGraph.getAdjList();
-  if (graph.size() == 0) {
-    cout << "Error: empty adjacent list." << endl;
+  VertexColor::VertexColor() {
+    id_deg_.clear();
   }
-  n = graph.size();
-  for (int i = 0; i < n; i ++) {
-    deg.push_back(pair<int, int>(i, graph[i].size()));
-    for (int j = 0; j <= (n - 1) / BITS; j ++) {
-      ll[i][j] = 0;
+
+  VertexColor::VertexColor(Graph &graph) {
+    vector< vector<int> > adj_list = graph.adj_list();
+    if (adj_list.size() == 0) {
+      cout << "Error: empty adjacent list." << endl;
+      return;
     }
-  }
-  sort(deg.begin(), deg.end(), comp);
-  for (int i = 0; i < n; i ++) {
-    curColor[i] = -1;
-    DSATUR[i] = 0;
-    for (int t = 0; t < graph[i].size(); t ++) {
-      int j = graph[i][t];
-      setBit(ll[i][j / BITS], j % BITS);
-    }
-  }
-  heuristicColoring();
-  cout << "Heuristic result: " << bestColorNum << endl;
-  Clique clique(OriginalGraph);
-  vector<int> InitialList = clique.getMaximumCliqueList();
-  for (int i = 0; i < InitialList.size(); i ++) {
-    curColor[InitialList[i]] = i;
-    for (int j = 0; j < n; j ++)
-      if (isConnected(InitialList[i], j)) {
-	DSATUR[j] ++;
-      }
-  }
-  curUsedColor = InitialList.size();
-}
 
-VertexColor::~VertexColor() {
-  deg.clear();
-}
-
-void VertexColor::heuristicColoring() {
-  int curColor = 0;
-  for (int i = 0; i < n; i ++) {
-    int u = deg[i].first;
-    color[u] = -1;
-    bool Used[MAX_NUMBER_OF_VERTICES];
-    for (int j = 0; j < curColor; j ++) {
-      Used[j] = false;
+    num_vertices_ = adj_list.size();
+    for (size_t i = 0; i < num_vertices_; i ++) {
+      adj_matrix_.push_back(vector<unsigned int>(num_vertices_ / BITS + 1, 0));
     }
-    for (int j = 0; j < i; j ++) {
-      int v = deg[j].first;
-      if (isConnected(u, v)) {
-	Used[color[v]] = true;
+
+    for (size_t i = 0; i < num_vertices_; i ++) {
+      id_deg_.push_back(pair<int, int>(i, adj_list[i].size()));
+      for (unsigned int j = 0; j <= (num_vertices_ - 1) / BITS; j ++) {
+	adj_matrix_[i][j] = 0;
       }
     }
-    for (int j = 0; j < curColor; j ++)
-      if (!Used[j]) {
-	color[u] = j;
-	break;
-      }
-    if (color[u] == -1) {
-      curColor ++;
-      color[u] = curColor - 1;
-      vector<int> newColor;
-      newColor.push_back(u);
-    }
-  }
-  bestColorNum = curColor;
-}
 
-// uu can be colored by color j
-bool VertexColor::isPossible(int uu, int j) {
-  for (int i = 0; i < n; i ++)
-    if (curColor[i] != -1 && isConnected(i, uu) && curColor[i] == j) {
-      return false;
-    }
-  return true;
-}
+    sort(id_deg_.begin(), id_deg_.end(), comp);
 
-void VertexColor::update(int uu, int t) {
-  for (int i = 0; i < n; i ++)
-    if (isConnected(i, uu)) {
-      DSATUR[i] += t;
-    }
-}
+    for (size_t i = 0; i < num_vertices_; i ++) {
+      color_.push_back(-1);
+      cur_color_.push_back(-1);
+      dsatur_.push_back(0);
 
-void VertexColor::bbColoring(int Remain, int curUsedColor) {
-  if (Remain <= 0) {
-    if (curUsedColor < bestColorNum) {
-      bestColorNum = curUsedColor;
-      cout << "New val: " << bestColorNum << endl;
-      for (int i = 0; i < n; i ++) {
-	color[i] = curColor[i];
+      for (size_t t = 0; t < adj_list[i].size(); t ++) {
+	int j = adj_list[i][t];
+	set_bit(adj_matrix_[i][j / BITS], j % BITS);
       }
     }
-    return;
-  }
-  if (curUsedColor >= bestColorNum) return;
-  int MaxDSATUR = -1;
-  int uu = -1;
-  for (int i = 0; i < n; i ++) {
-    int u = deg[i].first;
-    if (curColor[u] != -1) continue;
-    if (DSATUR[u] > MaxDSATUR) {
-      MaxDSATUR = DSATUR[u];
-      uu = u;
+
+    HeuristicColoring();
+
+    cout << "Heuristic result: " << best_color_num_ << endl;
+
+    Clique clique(graph);
+
+    vector<int> initial_list = clique.max_clique();
+ 
+    for (size_t i = 0; i < initial_list.size(); i ++) {
+      cur_color_[initial_list[i]] = i;
+      for (size_t j = 0; j < num_vertices_; j ++)
+	if (IsConnected(initial_list[i], j)) {
+	  dsatur_[j] ++;
+	}
     }
+    cur_used_color_ = initial_list.size();
+
   }
-  for (int j = 0; j < curUsedColor + 1; j ++) 
-    if (isPossible(uu, j)) {
-      curColor[uu] = j;
-      update(uu, 1);
-      bbColoring(Remain - 1, max(curUsedColor, j + 1));
-      curColor[uu] = -1;
-      update(uu, -1);
+
+  VertexColor::~VertexColor() {
+    id_deg_.clear();
+  }
+
+  bool VertexColor::IsConnected(int i, int j) {
+    return (get_bit(adj_matrix_[i][j / BITS], j % BITS) == 1);
+  }
+
+  // uu can be colored by color j
+  bool VertexColor::IsPossible(int uu, int j) {
+    for (size_t i = 0; i < num_vertices_; i ++)
+      if (cur_color_[i] != -1 && IsConnected(i, uu) && cur_color_[i] == j) {
+	return false;
+      }
+    return true;
+  }
+
+  void VertexColor::Update(int uu, int t) {
+    for (size_t i = 0; i < num_vertices_; i ++)
+      if (IsConnected(i, uu)) {
+	dsatur_[i] += t;
+      }
+  }
+
+  void VertexColor::HeuristicColoring() {
+    int cur_color_num = 0;
+    for (size_t i = 0; i < num_vertices_; i ++) {
+      int u = id_deg_[i].first;
+      color_[u] = -1;
+      bool Used[MAX_NUMBER_OF_VERTICES];
+      for (int j = 0; j < cur_color_num; j ++) {
+	Used[j] = false;
+      }
+      for (size_t j = 0; j < i; j ++) {
+	int v = id_deg_[j].first;
+	if (IsConnected(u, v)) {
+	  Used[color_[v]] = true;
+	}
+      }
+      for (int j = 0; j < cur_color_num; j ++)
+	if (!Used[j]) {
+	  color_[u] = j;
+	  break;
+	}
+      if (color_[u] == -1) {
+	cur_color_num ++;
+	color_[u] = cur_color_num - 1;
+	vector<int> newColor;
+	newColor.push_back(u);
+      }
     }
-}
-
-void VertexColor::coloring() {
-  // Find maximum clique in the given graph to determine initial colors
-  int Remain = n - curUsedColor;
-  bbColoring(Remain, curUsedColor);
-}
-
-vector< vector<int> > VertexColor::getColorList() {
-  coloring();
-  vector< vector<int> > colorList;
-  for (int i = 0; i < bestColorNum; i ++) {
-    vector<int> newColor;
-    colorList.push_back(newColor);
+    best_color_num_ = cur_color_num;
   }
-  for (int i = 0; i < n; i ++) {
-    colorList[color[i]].push_back(i);
-  }
-  return colorList;
-}
 
+  void VertexColor::BbColoring(int remain, int cur_used_color_) {
+    if (remain <= 0) {
+      if (cur_used_color_ < best_color_num_) {
+	best_color_num_ = cur_used_color_;
+	cout << "New val: " << best_color_num_ << endl;
+	for (size_t i = 0; i < num_vertices_; i ++) {
+	  color_[i] = cur_color_[i];
+	}
+      }
+      return;
+    }
+
+    if (cur_used_color_ >= best_color_num_) return;
+
+    int max_dsatur = -1;
+    int uu = -1;
+    for (size_t i = 0; i < num_vertices_; i ++) {
+      int u = id_deg_[i].first;
+      if (cur_color_[u] != -1) continue;
+      if (dsatur_[u] > max_dsatur) {
+	max_dsatur = dsatur_[u];
+	uu = u;
+      }
+    }
+    for (int j = 0; j < cur_used_color_ + 1; j ++) 
+      if (IsPossible(uu, j)) {
+	cur_color_[uu] = j;
+	Update(uu, 1);
+	BbColoring(remain - 1, max(cur_used_color_, j + 1));
+
+	cur_color_[uu] = -1;
+
+	Update(uu, -1);
+      }
+  }
+
+  void VertexColor::Coloring() {
+    // Find maximum clique in the given graph to determine initial colors
+    int remain = num_vertices_ - cur_used_color_;
+    BbColoring(remain, cur_used_color_);
+  }
+
+  vector< vector<int> > VertexColor::GetColorList() {
+    Coloring();
+
+    vector< vector<int> > color_list;
+    for (int i = 0; i < best_color_num_; i ++) {
+      vector<int> new_color;
+      color_list.push_back(new_color);
+    }
+
+    for (size_t i = 0; i < num_vertices_; i ++) {
+      color_list[color_[i]].push_back(i);
+    }
+
+    return color_list;
+  }
+
+}
